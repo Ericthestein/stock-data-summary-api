@@ -43,13 +43,13 @@ app.get('/stocks/:ticker', async (req: Request, res: Response) => {
     const ticker: string = req.params["ticker"];
 
     // Attempt to fetch summary from cache
-    const cachedSummary: StockSummary | undefined = await cache.getSummaryFromCache(ticker);
-    if (cachedSummary !== undefined) {  // If summary is in cache, return it
+    const cachedSummary: StockSummary | null = await cache.getSummaryFromCache(ticker);
+    if (cachedSummary !== null) {  // If summary is in cache, return it
         res.send(cachedSummary);
         return;
     }
 
-    // Generate summary
+    // Otherwise, generate summary
     const fetcher: StockFetcher = new StockFetcherFMP(fmpKey, ticker);
     const summary: StockSummary = await fetcher.generateSummary();
 
