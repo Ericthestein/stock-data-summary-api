@@ -3,7 +3,7 @@ import {CompanyProfile, ESGScoresByYear, NewsStory, StockSummary} from "./Types"
 
 
 export default class StockFetcherFMP implements StockFetcher {
-    // FinancialModelingPrep API Endpoints
+    /* FinancialModelingPrep API Endpoints */
     private readonly realTimePriceEndpoint = "https://financialmodelingprep.com/api/v3/quote-short";
     private readonly historicalPriceEndpoint = "https://financialmodelingprep.com/api/v3/historical-price-full";
     private readonly priceChangeEndpoint = "https://financialmodelingprep.com/api/v3/stock-price-change";
