@@ -36,7 +36,7 @@ const app = (0, express_1.default)();
 app.get('/stocks/:ticker', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Validate input
     const ticker = req.params["ticker"];
-    // Create summary
+    // Generate summary
     const fetcher = new StockFetcherFMP_1.default(fmpKey, ticker);
     const summary = yield fetcher.generateSummary();
     // Return summary

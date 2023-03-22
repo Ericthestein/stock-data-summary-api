@@ -1,3 +1,7 @@
+type ESGScoresByYear = {
+    [key: number]: number
+}
+
 type StockProfile = {
     company: string,
     location: string,
@@ -9,8 +13,8 @@ type StockSummary = {
     priceLastYear: number,
     yearlyPriceChange: number,
     newsStories: string[],
-    ESGScores: number[],
+    ESGScores: ESGScoresByYear,
     stockProfile: StockProfile
 }
 
-export {StockProfile, StockSummary}
+export {ESGScoresByYear, StockProfile, StockSummary}
