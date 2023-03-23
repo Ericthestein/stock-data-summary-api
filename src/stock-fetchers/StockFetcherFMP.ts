@@ -218,6 +218,9 @@ export default class StockFetcherFMP implements StockFetcher {
     /**
      * Validates the response returned by Financial Modeling Prep.
      * @param {any} responseJSON - The response returned by the API in JSON
+     * @throws {TickerNotFoundError} If the instance's ticker cannot be found by the API.
+     * @throws {APILimitReachedError} If the usage limit has been reached for the API key.
+     * @throws {InvalidAPIKeyError} If the API key is invalid.
      */
     private validateResponse = (responseJSON: any) => {
         if (Array.isArray(responseJSON)) {
