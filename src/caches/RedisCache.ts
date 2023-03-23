@@ -2,12 +2,24 @@ import Cache from "./Cache";
 import {createClient, RedisClientType} from "redis";
 import {StockSummary} from "../stock-fetchers/Types";
 
+/**
+ * A cache client that stores stock-related data using a Redis server.
+ * @class
+ */
 export default class RedisCache implements Cache {
-	static readonly MAX_CACHE_LIFE = 86400000;  // The maximum time (in milliseconds) that a cached value is valid
+	/**
+	 * The maximum time (in milliseconds) that a cached value is valid.
+	 */
+	static readonly MAX_CACHE_LIFE = 86400000;
 
 	private client: RedisClientType;
 	private connected: boolean = false;
 
+	/**
+	 * Creates a RedisCache.
+	 * @param {string} host - The host of the Redis server.
+	 * @param {string} port - The port of the Redis server.
+	 */
 	constructor(
 		private host: string,
 		private port: string,
@@ -20,6 +32,11 @@ export default class RedisCache implements Cache {
 
 	/* Cache retrieval */
 
+	/**
+	 * Retrieves the summary for the given stock ticker from the cache, if it exists and has not expired. Otherwise, returns null.
+	 * @param {string} ticker - The ticker of the stock to retrieve a summary for
+	 * @return {Promise<StockSummary | null>} A promise resolving to the StockSummary of the given ticker, or null if it does not exist in the cache or if it has expired
+	 */
 	public getSummaryFromCache = async (ticker: string): Promise<StockSummary | null>  => {
 		// Connect to redis server
 		await this.waitForConnection();
@@ -45,7 +62,12 @@ export default class RedisCache implements Cache {
 
 	/* Cache insertion */
 
-	public addSummaryToCache = async (ticker: string, summary: StockSummary): Promise<void> => {
+	/**
+	 * Adds the summary for the given stock ticker to the cache.
+	 * @param {string} ticker - The ticker of the stock to store a summary for in the cache.
+	 * @param {StockSummary} summary - The summary to store in the cache.
+	 */
+	public addSummaryToCache = async (ticker: string, summary: StockSummary) => {
 		// Connect to redis server
 		await this.waitForConnection();
 
@@ -64,6 +86,9 @@ export default class RedisCache implements Cache {
 
 	/* Helper methods */
 
+	/**
+	 * Waits for a connection to be established with the Redis server. Returns true if the connection has previously been established.
+	 */
 	private waitForConnection = async () => {
 		if (this.connected) return;
 		await this.client.connect();

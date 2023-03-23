@@ -1,7 +1,11 @@
+import {APILimitReachedError, InvalidAPIKeyError, TickerNotFoundError } from "./Errors";
 import StockFetcher from "./StockFetcher";
 import {CompanyProfile, ESGScoresByYear, NewsStory, StockSummary} from "./Types";
 
-
+/**
+ * A StockFetcher that fetches data from Financial Modeling Prep.
+ * @class
+ */
 export default class StockFetcherFMP implements StockFetcher {
     /* FinancialModelingPrep API Endpoints */
     private readonly realTimePriceEndpoint = "https://financialmodelingprep.com/api/v3/quote-short";
@@ -11,14 +15,25 @@ export default class StockFetcherFMP implements StockFetcher {
     private readonly esgEndpoint = "https://financialmodelingprep.com/api/v4/esg-environmental-social-governance-data";
     private readonly companyProfileEndpoint = "https://financialmodelingprep.com/api/v3/profile";
 
+    private readonly _apiName: string = "Financial Modeling Prep";
+
+    /**
+     * Creates a StockFetcherFMP.
+     * @param {string} _ticker - The stock ticker that this instance will fetch data for.
+     * @param {string} fmpKey - The API key to use for calls to Financial Modeling Prep.
+     */
     constructor(
+        private _ticker: string,
         private fmpKey: string,
-        private _ticker: string
     ) {}
 
     /* API Fetchers */
 
-    fetchCurrentPrice = async (): Promise<number> => {
+    /**
+     * Fetches the current price of the stock.
+     * @return {Promise<number>} A promise resolving to the current price.
+     */
+    private fetchCurrentPrice = async (): Promise<number> => {
         // Build URL
         const url = new URL(this.realTimePriceEndpoint);
         url.pathname += "/" + this._ticker;
@@ -29,6 +44,7 @@ export default class StockFetcherFMP implements StockFetcher {
         const responseJSON = await response.json();
 
         // Validate response
+        this.validateResponse(responseJSON);
 
         // Get price
         const price: number = responseJSON[0]["price"];
@@ -37,7 +53,12 @@ export default class StockFetcherFMP implements StockFetcher {
         return priceRounded;
     }
 
-    fetchPriceOnDate = async (date: Date): Promise<number> => {
+    /**
+     * Fetches the price of the stock on a given date.
+     * @param {Date} date - The date at which to fetch the price data.
+     * @return {Promise<number>} A promise resolving to the price.
+     */
+    private fetchPriceOnDate = async (date: Date): Promise<number> => {
         // Build URL
         const url = new URL(this.historicalPriceEndpoint);
         url.pathname += "/" + this._ticker;
@@ -51,6 +72,7 @@ export default class StockFetcherFMP implements StockFetcher {
         const responseJSON = await response.json();
 
         // Validate response
+        this.validateResponse(responseJSON);
 
         // Get price
         const price: number = responseJSON["historical"][0]["close"];
@@ -59,7 +81,12 @@ export default class StockFetcherFMP implements StockFetcher {
         return priceRounded;
     }
 
-    fetchPricePercentChange = async (timeframe: string = "1Y"): Promise<number> => {
+    /**
+     * Fetches the percent change in price of the stock over a given timeframe
+     * @param {string} timeframe - The timeframe to calculate percent change over. Valid values: 1D, 5D, 1M, 3M, 6M, ytd, 1Y, 3Y, 5Y, 10Y, max
+     * @return {Promise<number>} The percent change in price.
+     */
+    private fetchPricePercentChange = async (timeframe: string = "1Y"): Promise<number> => {
         // Build URL
         const url = new URL(this.priceChangeEndpoint);
         url.pathname += "/" + this._ticker;
@@ -70,6 +97,7 @@ export default class StockFetcherFMP implements StockFetcher {
         const responseJSON = await response.json();
 
         // Validate response
+        this.validateResponse(responseJSON);
 
         // Get percent change
         const change: number = responseJSON[0][timeframe];
@@ -78,7 +106,11 @@ export default class StockFetcherFMP implements StockFetcher {
         return changeRounded;
     }
 
-    fetchESGRecords = async (): Promise<ESGScoresByYear> => {
+    /**
+     * Fetches ESG records of the stock.
+     * @return {Promise<ESGScoresByYear>} A promise resolving to the ESG scores of the stock by year.
+     */
+    private fetchESGRecords = async (): Promise<ESGScoresByYear> => {
         // Build URL
         const url = new URL(this.esgEndpoint);
         url.searchParams.append("symbol", this._ticker);
@@ -89,6 +121,7 @@ export default class StockFetcherFMP implements StockFetcher {
         const responseJSON = await response.json();
 
         // Validate response
+        this.validateResponse(responseJSON);
 
         // Get ESG records by year
         const esgScores: ESGScoresByYear = {};
@@ -106,7 +139,12 @@ export default class StockFetcherFMP implements StockFetcher {
         return esgScores;
     }
 
-    fetchNewsStories = async (limit: number = 5): Promise<NewsStory[]> => {
+    /**
+     * Fetches recent news stories for the stock.
+     * @param {number} limit - The maximum number of news stories to fetch.
+     * @return {Promise<NewsStory[]>} A promise resolving to a list of new stories.
+     */
+    private fetchNewsStories = async (limit: number = 5): Promise<NewsStory[]> => {
         // Build URL
         const url = new URL(this.newsEndpoint);
         url.searchParams.append("tickers", this._ticker);
@@ -118,7 +156,7 @@ export default class StockFetcherFMP implements StockFetcher {
         const responseJSON = await response.json();
 
         // Validate response
-
+        this.validateResponse(responseJSON);
 
         // Get news stories
         const news: NewsStory[] = [];
@@ -135,7 +173,11 @@ export default class StockFetcherFMP implements StockFetcher {
         return news;
     }
 
-    fetchCompanyProfile = async (): Promise<CompanyProfile> => {
+    /**
+     * Fetches the stock company's profile.
+     * @return {Promise<CompanyProfile>} A promise resolving to the stock company's profile.
+     */
+    private fetchCompanyProfile = async (): Promise<CompanyProfile> => {
         // Build URL
         const url = new URL(this.companyProfileEndpoint);
         url.pathname += "/" + this._ticker;
@@ -146,7 +188,7 @@ export default class StockFetcherFMP implements StockFetcher {
         const responseJSON = await response.json();
 
         // Validate response
-
+        this.validateResponse(responseJSON);
 
         // Get profile
         const companyData = responseJSON[0];
@@ -173,7 +215,38 @@ export default class StockFetcherFMP implements StockFetcher {
 
     /* Helper methods */
 
-    extractYearFounded = (text: string): number => {
+    /**
+     * Validates the response returned by Financial Modeling Prep.
+     * @param {any} responseJSON - The response returned by the API in JSON
+     */
+    private validateResponse = (responseJSON: any) => {
+        if (Array.isArray(responseJSON)) {
+            if (responseJSON.length === 0) {
+                throw new TickerNotFoundError(this._ticker);
+            }
+        } else {
+            const errorMessage = responseJSON["Error Message"]
+            if (errorMessage) {
+                if (errorMessage.includes("Limit")) {
+                    throw new APILimitReachedError(this._apiName);
+                } else if (errorMessage.includes("Invalid API KEY")) {
+                    throw new InvalidAPIKeyError(this._apiName);
+                }
+            } else {
+                const keys = Object.keys(responseJSON);
+                if (keys.length === 0) {
+                    throw new TickerNotFoundError(this._ticker);
+                }
+            }
+        }
+    }
+
+    /**
+     * Extracts the year in which the company was founded from a given string.
+     * @param {string} text - The text to search for the founding year in.
+     * @return {number} - The year in which the company was founded, or -1 if the year cannot be extracted.
+     */
+    private extractYearFounded = (text: string): number => {
         // Search for keywords
         const keywordRegex: RegExp = new RegExp("founded in |incorporated in ", "i");
         const textParts = text.split(keywordRegex, 2);
@@ -190,7 +263,11 @@ export default class StockFetcherFMP implements StockFetcher {
 
     /* Output */
 
-    generateSummary = async (): Promise<StockSummary> => {
+    /**
+     * Generates a summary of the stock data (both price-related and company-related) for the ticker used when initializing the StockFetcher.
+     * @return {Promise<StockSummary>} A promise resolving to the StockSummary of the ticker
+     */
+    public generateSummary = async (): Promise<StockSummary> => {
         // Fetch price
         const price: number = await this.fetchCurrentPrice();
 
@@ -219,7 +296,19 @@ export default class StockFetcherFMP implements StockFetcher {
 
     /* Getters */
 
+    /**
+     * Returns the ticker that this instance fetches data for.
+     * @return {string} The instance's ticker.
+     */
     public get ticker(): string {
         return this._ticker;
+    }
+
+    /**
+     * Returns the name of the API used by the StockFetcher.
+     * @return {string} The instance's API name.
+     */
+    public get apiName(): string {
+        return this._apiName;
     }
 }

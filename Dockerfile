@@ -18,7 +18,7 @@ RUN npm install
 COPY . .
 
 # Expose port for API
-EXPOSE 8000
+EXPOSE 80
 
 # Build the app
 RUN npm run build
