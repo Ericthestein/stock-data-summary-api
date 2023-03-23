@@ -1,5 +1,11 @@
 # Stock Data Summary API
 
+This API provides a GET endpoint that returns a summary for a given stock:
+
+```
+GET /stocks/:ticker
+```
+
 ## Running with Docker
 
 ### Build
