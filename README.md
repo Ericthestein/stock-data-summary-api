@@ -11,5 +11,5 @@ docker build . -t ericthestein/novig-backend-exercise
 ### Run
 
 ```
-docker run -p 80:8000 -e FMP_KEY="" -e PORT=8000 -d ericthestein/novig-backend-exercise
+docker run -p 80:80 -e FMP_KEY="" -d ericthestein/novig-backend-exercise
 ```
