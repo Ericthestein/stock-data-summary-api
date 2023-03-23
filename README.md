@@ -8,7 +8,7 @@ GET /stocks/:ticker
 
 ## Live
 
-This API is currently live at [this endpoint](https://stock-data-summary.alcka3a5fmha4.us-east-1.cs.amazonlightsail.com/stocks/meta)
+The API is currently live at [this endpoint](https://stock-data-summary.alcka3a5fmha4.us-east-1.cs.amazonlightsail.com/stocks/meta)
 
 ## Running with Docker
 
